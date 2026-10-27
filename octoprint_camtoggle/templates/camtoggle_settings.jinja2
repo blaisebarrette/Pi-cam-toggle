@@ -1,0 +1,37 @@
+<h3>CamToggle</h3>
+<form class="form-horizontal" onsubmit="return false;">
+    <div class="control-group">
+        <label class="control-label">Service(s) systemd</label>
+        <div class="controls">
+            <input type="text" class="input-xlarge" data-bind="value: settings.plugins.camtoggle.services">
+            <span class="help-block">
+                Séparés par des virgules. OctoPi ≥ 1.0 : <code>camera-streamer-libcamera</code>
+                (Pi Cam) ou <code>camera-streamer-usb-default</code>. OctoPi &lt; 1.0 : <code>webcamd</code>.
+                Crowsnest : <code>crowsnest</code>.
+            </span>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">Chemin systemctl</label>
+        <div class="controls">
+            <input type="text" class="input-large" data-bind="value: settings.plugins.camtoggle.systemctl">
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <label class="checkbox">
+                <input type="checkbox" data-bind="checked: settings.plugins.camtoggle.persist">
+                Conserver l'état après un redémarrage (enable/disable)
+            </label>
+            <label class="checkbox">
+                <input type="checkbox" data-bind="checked: settings.plugins.camtoggle.auto_on_print_start">
+                Activer la caméra au début d'une impression
+            </label>
+            <label class="checkbox">
+                <input type="checkbox" data-bind="checked: settings.plugins.camtoggle.auto_off_print_done">
+                Désactiver la caméra à la fin d'une impression
+            </label>
+        </div>
+    </div>
+    <p class="muted">Nécessite une règle sudoers — voir le README du plugin.</p>
+</form>
