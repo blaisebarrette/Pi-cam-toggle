@@ -1,7 +1,7 @@
 # OctoPrint-CamToggle
 
 Bouton dans la barre de navigation d'OctoPrint pour **arrêter / démarrer le service caméra** du Raspberry Pi
-(camera-streamer, webcamd, crowsnest…). Caméra arrêtée = CPU/GPU, mémoire et bande passante libérés.
+(camera-streamer, webcamd, crowsnest…). Caméra arrêtée = CPU, mémoire, caméra et bande passante libérés.
 
 ## Fonctions
 - Détection automatique du service caméra (camera-streamer, webcamd, crowsnest).
@@ -41,6 +41,35 @@ En cas de refus, le message d'erreur du plugin donne la commande exacte à copie
 
 Le plugin détecte le service tout seul (survolez l'icône pour le voir).
 Pour forcer un service, renseignez-le dans *Paramètres → CamToggle*.
+
+## Testé
+| Version | Système | Service | Résultat |
+|---|---|---|---|
+| 0.3.0 | OctoPi (octopi-piero) | `webcamd` | ✅ Bascule on/off **sans aucune règle sudoers ajoutée** (vérifié après `sudo -k`) |
+
+### Ce qui est libéré / ce qui ne l'est pas
+- ✅ Processus de streaming arrêté (`mjpg_streamer`, camera-streamer…) : CPU et RAM libérés.
+- ✅ `/dev/video0` relâché, plus de capture.
+- ✅ Plus aucun trafic vidéo sur le réseau.
+- ❌ La mémoire GPU (`gpu_mem`) reste réservée et le pilote caméra reste chargé (fixés au boot).
+- ⚠️ Les timelapses échouent si la caméra est éteinte : utilisez l'option « Activer au début d'une impression ».
+
+Pour mesurer (caméra active puis éteinte) :
+```bash
+ps -C mjpg_streamer -o %cpu,rss,cmd
+sudo fuser -v /dev/video0
+```
+
+## Dépannage
+- **« sudo: a password is required »** : vérifiez que vous configurez bien **le Pi qui héberge OctoPrint**
+  (le message d'erreur indique `host=` et `user=`).
+- **Tester une règle sudo** : faites toujours `sudo -k` avant `sudo -n …`. Sur OctoPi (`timestamp_type=global`),
+  un mot de passe tapé récemment est réutilisé pendant 15 min, même par OctoPrint, et fausse le test.
+- **Icône grise alors que la vidéo tourne** : mauvais service. Videz le champ « Service(s) » pour
+  la détection automatique, ou indiquez le bon nom.
+- **La caméra ne démarre plus au boot** : une version < 0.3.0 a pu faire `systemctl disable`.
+  Corrigez une fois avec `sudo systemctl enable webcamd` (ou votre service).
+- **`visudo -c` signale « bad permissions »** : `sudo chmod 440 /etc/sudoers.d/<fichier>`, sinon sudo l'ignore.
 
 ## API
 ```
