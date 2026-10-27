@@ -236,7 +236,18 @@ class CamTogglePlugin(
     # ------------------------------------------------------------------ software update
 
     def get_update_information(self):
-        return {}
+        # Checks GitHub releases (tags vX.Y.Z) and installs the tagged archive with pip.
+        return {
+            "camtoggle": {
+                "displayName": "CamToggle",
+                "displayVersion": self._plugin_version,
+                "type": "github_release",
+                "user": "blaisebarrette",
+                "repo": "Pi-cam-toggle",
+                "current": self._plugin_version,
+                "pip": "https://github.com/blaisebarrette/Pi-cam-toggle/archive/{target_version}.zip",
+            }
+        }
 
 
 __plugin_name__ = "CamToggle"

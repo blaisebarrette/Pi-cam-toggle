@@ -10,6 +10,7 @@ A navbar button in OctoPrint to **stop / start the Raspberry Pi camera service**
 - Webcam stream reloaded automatically after a toggle.
 - Option: keep the state across reboots (re-applied when OctoPrint starts).
 - Option: turn the camera on when a print starts / off when it ends.
+- Update notifications in OctoPrint's Software Update (from GitHub releases).
 - Dedicated permission `CamToggle → Camera control` (admins by default).
 
 ## Installation
@@ -71,6 +72,12 @@ sudo fuser -v /dev/video0
 - **Camera no longer starts at boot**: a version < 0.3.0 may have run `systemctl disable`.
   Fix it once with `sudo systemctl enable webcamd` (or your service).
 - **`visudo -c` reports "bad permissions"**: `sudo chmod 440 /etc/sudoers.d/<file>`, otherwise sudo ignores it.
+
+## Releasing
+1. Bump `version` in `setup.py` (e.g. `0.3.2`) and push to `main`.
+2. Publish a GitHub release whose tag matches: `v0.3.2`.
+
+OctoPrint compares the installed version with the latest release tag, so they must match.
 
 ## API
 ```
