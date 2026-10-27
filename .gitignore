@@ -5,3 +5,4 @@ dist/
 build/
 *.zip
 .claude/.state/
+.DS_Store
