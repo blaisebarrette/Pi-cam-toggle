@@ -10,6 +10,7 @@ import getpass
 import socket
 import subprocess
 import threading
+import time
 
 import flask
 import octoprint.plugin
@@ -49,8 +50,12 @@ class CamTogglePlugin(
             # Dernier résultat de la détection automatique (interne).
             "detected": "",
             "systemctl": "/usr/bin/systemctl",
-            # Garde l'état après un redémarrage (systemctl enable/disable).
+            # OctoPi autorise déjà « sudo service » sans mot de passe (/etc/sudoers.d/octoprint-service).
+            "service_cmd": "/usr/sbin/service",
+            # Réapplique le dernier état choisi au démarrage d'OctoPrint.
             "persist": True,
+            # Dernier état choisi : "on", "off" ou "" (interne).
+            "desired": "",
             "auto_on_print_start": False,
             "auto_off_print_done": False,
         }
@@ -124,18 +129,33 @@ class CamTogglePlugin(
         return found
 
     def _run(self, *args, sudo=True):
-        cmd = (["sudo", "-n"] if sudo else []) + [self._settings.get(["systemctl"])] + list(args)
+        return self._exec([self._settings.get(["systemctl"])] + list(args), sudo=sudo)
+
+    def _exec(self, cmd, sudo=True):
+        cmd = (["sudo", "-n"] if sudo else []) + cmd
         try:
             p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             code, out = p.returncode, (p.stdout + p.stderr).strip()
         except Exception as e:  # FileNotFoundError, TimeoutExpired...
             code, out = 1, str(e)
         if sudo:
-            if code != 0:
-                out = "{} [cmd={} user={} host={}]".format(out, " ".join(cmd), getpass.getuser(),
-                                                           socket.gethostname())
             self._logger.info("%s -> %s %s", " ".join(cmd), code, out)
         return code, out
+
+    def _control(self, service, action):
+        """start/stop via « sudo service » (permis par défaut sur OctoPi), sinon « sudo systemctl »."""
+        code, out = self._exec([self._settings.get(["service_cmd"]), service, action])
+        if code == 0:
+            return None
+        code, out2 = self._run(action, service)
+        if code == 0:
+            return None
+        cmds = "{0} start {1}, {0} stop {1}".format(self._settings.get(["systemctl"]), service)
+        return (
+            "{} {} refusé ({}). Sur le Pi, en SSH : "
+            "echo '{} ALL=(root) NOPASSWD: {}' | sudo tee /etc/sudoers.d/octoprint-camtoggle "
+            "&& sudo chmod 440 /etc/sudoers.d/octoprint-camtoggle  [host={}]"
+        ).format(action, service, out2 or out, getpass.getuser(), cmds, socket.gethostname())
 
     def _is_active(self):
         services = self._services()
@@ -151,16 +171,15 @@ class CamTogglePlugin(
                 errors.append("Aucun service caméra trouvé : indiquez-le dans Paramètres → CamToggle")
             action = "start" if enable else "stop"
             for service in self._services():
-                code, out = self._run(action, service)
-                if code != 0:
-                    errors.append("{} {}: {}".format(action, service, out))
-                if self._settings.get_boolean(["persist"]):
-                    code, out = self._run("enable" if enable else "disable", service)
-                    if code != 0:
-                        errors.append("{} {}: {}".format("enable" if enable else "disable", service, out))
+                err = self._control(service, action)
+                if err:
+                    errors.append(err)
+            if not errors:
+                self._settings.set(["desired"], "on" if enable else "off")
+                self._settings.save()
+                self._logger.info("Caméra %s", "activée" if enable else "désactivée")
             for e in errors:
                 self._logger.error(e)
-            self._logger.info("Caméra %s", "activée" if enable else "désactivée")
             self._push_state(errors)
             return errors
 
@@ -195,6 +214,17 @@ class CamTogglePlugin(
 
     def on_after_startup(self):
         self._logger.info("CamToggle prêt — service(s) : %s", ", ".join(self._services()) or "aucun")
+        if self._settings.get_boolean(["persist"]) and self._settings.get(["desired"]) in ("on", "off"):
+            threading.Thread(target=self._restore_state, daemon=True).start()
+
+    def _restore_state(self):
+        # Le service caméra peut démarrer après OctoPrint : on vérifie deux fois.
+        enable = self._settings.get(["desired"]) == "on"
+        for delay in (10, 60):
+            time.sleep(delay)
+            if self._is_active() != enable:
+                self._logger.info("Réapplication de l'état mémorisé : %s", "on" if enable else "off")
+                self._set_state(enable)
 
     def on_event(self, event, payload):
         if event == Events.PRINT_STARTED and self._settings.get_boolean(["auto_on_print_start"]):

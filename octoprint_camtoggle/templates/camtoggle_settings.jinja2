@@ -22,7 +22,7 @@
         <div class="controls">
             <label class="checkbox">
                 <input type="checkbox" data-bind="checked: settings.plugins.camtoggle.persist">
-                Conserver l'état après un redémarrage (enable/disable)
+                Conserver l'état après un redémarrage (réappliqué au démarrage d'OctoPrint)
             </label>
             <label class="checkbox">
                 <input type="checkbox" data-bind="checked: settings.plugins.camtoggle.auto_on_print_start">
@@ -34,5 +34,6 @@
             </label>
         </div>
     </div>
-    <p class="muted">Nécessite une règle sudoers — voir le README du plugin.</p>
+    <p class="muted">Sur OctoPi, aucune configuration n'est nécessaire (« sudo service » y est déjà autorisé).
+        Ailleurs, une règle sudoers est requise — voir le README du plugin.</p>
 </form>

@@ -1,6 +1,4 @@
-# Copier dans /etc/sudoers.d/octoprint-camtoggle (chmod 440), puis valider : sudo visudo -c
-# Adapter l'utilisateur (pi) et le(s) service(s) à votre installation.
-pi ALL=(root) NOPASSWD: /usr/bin/systemctl start camera-streamer-libcamera, \
-                        /usr/bin/systemctl stop camera-streamer-libcamera, \
-                        /usr/bin/systemctl enable camera-streamer-libcamera, \
-                        /usr/bin/systemctl disable camera-streamer-libcamera
+# Inutile sur OctoPi (« sudo service » y est déjà autorisé).
+# Ailleurs : copier dans /etc/sudoers.d/octoprint-camtoggle (chmod 440), puis valider : sudo visudo -c
+# Adapter l'utilisateur (pi) et le service (webcamd).
+pi ALL=(root) NOPASSWD: /usr/bin/systemctl start webcamd, /usr/bin/systemctl stop webcamd

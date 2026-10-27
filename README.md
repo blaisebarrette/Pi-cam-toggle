@@ -7,7 +7,7 @@ Bouton dans la barre de navigation d'OctoPrint pour **arrêter / démarrer le se
 - Détection automatique du service caméra (camera-streamer, webcamd, crowsnest).
 - Icône caméra dans la navbar (verte = active, grise = arrêtée), un clic pour basculer.
 - État synchronisé entre tous les navigateurs ouverts.
-- Option : conserver l'état après redémarrage (`systemctl enable/disable`).
+- Option : conserver l'état après redémarrage (réappliqué au démarrage d'OctoPrint).
 - Option : activer au début d'une impression / désactiver à la fin.
 - Permission dédiée `CamToggle → Contrôle caméra` (admins par défaut).
 
@@ -17,16 +17,20 @@ Bouton dans la barre de navigation d'OctoPrint pour **arrêter / démarrer le se
 https://github.com/blaisebarrette/Pi-cam-toggle/archive/main.zip
 ```
 
-### Autoriser systemctl sans mot de passe (obligatoire)
-Sur le Pi, en SSH :
+### Permissions
+**Sur OctoPi : rien à faire.** OctoPi autorise déjà OctoPrint à lancer `sudo service …` sans mot de passe
+(`/etc/sudoers.d/octoprint-service`), et le plugin s'en sert pour arrêter/démarrer la caméra.
+
+Si ce fichier a de mauvaises permissions, sudo l'ignore : `sudo chmod 440 /etc/sudoers.d/octoprint-service`.
+
+**Ailleurs** (installation manuelle d'OctoPrint), ajoutez une règle une fois, en SSH :
 ```bash
-systemctl list-units --type=service | grep -Ei 'camera|webcam|crowsnest'   # nom du service
-SVC=webcamd   # ← à adapter
+SVC=webcamd   # ← nom du service caméra
 U=$(ps -o user= -p $(pgrep -f "octoprint serve" | head -1))
-echo "$U ALL=(root) NOPASSWD: /usr/bin/systemctl start $SVC, /usr/bin/systemctl stop $SVC, /usr/bin/systemctl enable $SVC, /usr/bin/systemctl disable $SVC" | sudo tee /etc/sudoers.d/octoprint-camtoggle
+echo "$U ALL=(root) NOPASSWD: /usr/bin/systemctl start $SVC, /usr/bin/systemctl stop $SVC" | sudo tee /etc/sudoers.d/octoprint-camtoggle
 sudo chmod 440 /etc/sudoers.d/octoprint-camtoggle && sudo visudo -c
-sudo -k; sudo -n /usr/bin/systemctl start $SVC && echo OK   # doit afficher OK sans mot de passe
 ```
+En cas de refus, le message d'erreur du plugin donne la commande exacte à copier.
 
 | Installation | Service |
 |---|---|
