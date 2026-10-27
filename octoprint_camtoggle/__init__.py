@@ -84,6 +84,10 @@ class CamTogglePlugin(
             {"type": "settings", "custom_bindings": False},
         ]
 
+    def is_template_autoescaped(self):
+        # Templates contain no Jinja variables: safe to autoescape (enforced from OctoPrint 1.13).
+        return True
+
     # ------------------------------------------------------------------ permissions
 
     def get_additional_permissions(self, *args, **kwargs):
