@@ -3,9 +3,10 @@
     <div class="control-group">
         <label class="control-label">Service(s) systemd</label>
         <div class="controls">
-            <input type="text" class="input-xlarge" data-bind="value: settings.plugins.camtoggle.services">
+            <input type="text" class="input-xlarge" placeholder="auto" data-bind="value: settings.plugins.camtoggle.services">
             <span class="help-block">
-                Séparés par des virgules. OctoPi ≥ 1.0 : <code>camera-streamer-libcamera</code>
+                <strong>Laisser vide pour la détection automatique</strong> (le service trouvé s'affiche
+                en survolant l'icône caméra). Sinon, un ou plusieurs services séparés par des virgules. OctoPi ≥ 1.0 : <code>camera-streamer-libcamera</code>
                 (Pi Cam) ou <code>camera-streamer-usb-default</code>. OctoPi &lt; 1.0 : <code>webcamd</code>.
                 Crowsnest : <code>crowsnest</code>.
             </span>

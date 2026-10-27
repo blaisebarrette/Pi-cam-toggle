@@ -6,6 +6,12 @@ $(function () {
 
         self.active = ko.observable(false);
         self.busy = ko.observable(false);
+        self.services = ko.observableArray([]);
+
+        self.title = ko.pureComputed(function () {
+            var svc = self.services().length ? " (" + self.services().join(", ") + ")" : " (aucun service trouvé)";
+            return (self.active() ? "Caméra active — cliquer pour désactiver" : "Caméra désactivée — cliquer pour activer") + svc;
+        });
 
         self.canControl = ko.pureComputed(function () {
             return self.loginState.hasPermission(self.access.permissions.PLUGIN_CAMTOGGLE_CONTROL);
@@ -14,6 +20,7 @@ $(function () {
         self.refresh = function () {
             OctoPrint.simpleApiGet("camtoggle").done(function (r) {
                 self.active(r.active);
+                self.services(r.services || []);
             });
         };
 
@@ -46,6 +53,7 @@ $(function () {
         self.onPluginMessage = function (plugin, data) {
             if (plugin !== "camtoggle") return;
             self.active(data.active);
+            if (data.services) self.services(data.services);
         };
 
         self.onUserLoggedIn = self.refresh;

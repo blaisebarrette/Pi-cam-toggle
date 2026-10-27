@@ -1,4 +1,4 @@
-<a href="javascript:void(0)" data-bind="click: toggle, visible: canControl, attr: {title: active() ? 'Caméra active — cliquer pour désactiver' : 'Caméra désactivée — cliquer pour activer'}">
+<a href="javascript:void(0)" data-bind="click: toggle, visible: canControl, attr: {title: title}">
     <i class="fas fa-video" data-bind="visible: active() && !busy()" style="color:#5cb85c"></i>
     <i class="fas fa-video-slash" data-bind="visible: !active() && !busy()" style="color:#999"></i>
     <i class="fas fa-spinner fa-spin" data-bind="visible: busy"></i>
