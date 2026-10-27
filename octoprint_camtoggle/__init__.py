@@ -1,8 +1,8 @@
 # coding=utf-8
-"""OctoPrint-CamToggle : active/désactive le service caméra du Pi depuis OctoPrint.
+"""OctoPrint-CamToggle: turn the Pi camera service on/off from OctoPrint.
 
-Arrêter le service de streaming (camera-streamer, webcamd, crowsnest...) libère
-la caméra, le CPU/GPU et la bande passante réseau du Raspberry Pi.
+Stopping the streaming service (camera-streamer, webcamd, crowsnest...) frees
+the camera, CPU, memory and network bandwidth of the Raspberry Pi.
 """
 from __future__ import absolute_import
 
@@ -19,10 +19,10 @@ from octoprint.access.permissions import Permissions
 from octoprint.events import Events
 
 
-# Services caméra connus, par ordre de préférence pour la détection automatique.
+# Known camera services, in order of preference for auto-detection.
 KNOWN_SERVICES = [
     "camera-streamer-libcamera",    # OctoPi >= 1.0, Pi Camera
-    "camera-streamer-usb-default",  # OctoPi >= 1.0, webcam USB
+    "camera-streamer-usb-default",  # OctoPi >= 1.0, USB webcam
     "webcamd",                      # OctoPi < 1.0
     "crowsnest",                    # Crowsnest
 ]
@@ -44,17 +44,17 @@ class CamTogglePlugin(
 
     def get_settings_defaults(self):
         return {
-            # Un ou plusieurs services systemd, séparés par des virgules.
-            # Vide = détection automatique parmi KNOWN_SERVICES.
+            # One or more systemd services, comma-separated.
+            # Empty = auto-detection among KNOWN_SERVICES.
             "services": "",
-            # Dernier résultat de la détection automatique (interne).
+            # Last auto-detection result (internal).
             "detected": "",
             "systemctl": "/usr/bin/systemctl",
-            # OctoPi autorise déjà « sudo service » sans mot de passe (/etc/sudoers.d/octoprint-service).
+            # OctoPi already allows passwordless "sudo service" (/etc/sudoers.d/octoprint-service).
             "service_cmd": "/usr/sbin/service",
-            # Réapplique le dernier état choisi au démarrage d'OctoPrint.
+            # Re-apply the last chosen state when OctoPrint starts.
             "persist": True,
-            # Dernier état choisi : "on", "off" ou "" (interne).
+            # Last chosen state: "on", "off" or "" (internal).
             "desired": "",
             "auto_on_print_start": False,
             "auto_off_print_done": False,
@@ -64,7 +64,7 @@ class CamTogglePlugin(
         return 2
 
     def on_settings_migrate(self, target, current):
-        # La v1 avait camera-streamer-libcamera par défaut : passer en détection auto.
+        # v1 defaulted to camera-streamer-libcamera: switch to auto-detection.
         if (current or 1) < 2 and self._settings.get(["services"]) == "camera-streamer-libcamera":
             self._settings.set(["services"], "")
 
@@ -90,8 +90,8 @@ class CamTogglePlugin(
         return [
             {
                 "key": "CONTROL",
-                "name": "Contrôle caméra",
-                "description": "Permet d'activer/désactiver le service caméra",
+                "name": "Camera control",
+                "description": "Allows turning the camera service on/off",
                 "roles": ["control"],
                 "default_groups": [ADMIN_GROUP],
             }
@@ -119,13 +119,13 @@ class CamTogglePlugin(
         enabled = [s for s in loaded if states[s].get("UnitFileState") == "enabled"]
         found = active or enabled
         if found:
-            # Mémorisé pour retrouver le bon service quand la caméra est arrêtée et désactivée.
+            # Remembered to find the right service once the camera is stopped and disabled.
             self._settings.set(["detected"], ",".join(found))
             self._settings.save()
         else:
             last = [s for s in (self._settings.get(["detected"]) or "").split(",") if s in loaded]
             found = last or loaded[:1]
-        self._logger.info("Service(s) caméra détecté(s) : %s", ", ".join(found) or "aucun")
+        self._logger.info("Detected camera service(s): %s", ", ".join(found) or "none")
         return found
 
     def _run(self, *args, sudo=True):
@@ -143,7 +143,7 @@ class CamTogglePlugin(
         return code, out
 
     def _control(self, service, action):
-        """start/stop via « sudo service » (permis par défaut sur OctoPi), sinon « sudo systemctl »."""
+        """start/stop via "sudo service" (allowed by default on OctoPi), else "sudo systemctl"."""
         code, out = self._exec([self._settings.get(["service_cmd"]), service, action])
         if code == 0:
             return None
@@ -152,7 +152,7 @@ class CamTogglePlugin(
             return None
         cmds = "{0} start {1}, {0} stop {1}".format(self._settings.get(["systemctl"]), service)
         return (
-            "{} {} refusé ({}). Sur le Pi, en SSH : "
+            "{} {} denied ({}). On the Pi, over SSH: "
             "echo '{} ALL=(root) NOPASSWD: {}' | sudo tee /etc/sudoers.d/octoprint-camtoggle "
             "&& sudo chmod 440 /etc/sudoers.d/octoprint-camtoggle  [host={}]"
         ).format(action, service, out2 or out, getpass.getuser(), cmds, socket.gethostname())
@@ -161,14 +161,14 @@ class CamTogglePlugin(
         services = self._services()
         if not services:
             return False
-        # Actif si au moins un service tourne
+        # Active if at least one service is running
         return any(self._run("is-active", "--quiet", s, sudo=False)[0] == 0 for s in services)
 
     def _set_state(self, enable):
         with self._lock:
             errors = []
             if not self._services():
-                errors.append("Aucun service caméra trouvé : indiquez-le dans Paramètres → CamToggle")
+                errors.append("No camera service found: set it in Settings → CamToggle")
             action = "start" if enable else "stop"
             for service in self._services():
                 err = self._control(service, action)
@@ -177,7 +177,7 @@ class CamTogglePlugin(
             if not errors:
                 self._settings.set(["desired"], "on" if enable else "off")
                 self._settings.save()
-                self._logger.info("Caméra %s", "activée" if enable else "désactivée")
+                self._logger.info("Camera %s", "on" if enable else "off")
             for e in errors:
                 self._logger.error(e)
             self._push_state(errors)
@@ -199,7 +199,7 @@ class CamTogglePlugin(
 
     def on_api_command(self, command, data):
         if not Permissions.PLUGIN_CAMTOGGLE_CONTROL.can():
-            return flask.make_response("Permission refusée", 403)
+            return flask.make_response("Permission denied", 403)
         if command == "toggle":
             enable = not self._is_active()
         else:
@@ -213,17 +213,17 @@ class CamTogglePlugin(
     # ------------------------------------------------------------------ events
 
     def on_after_startup(self):
-        self._logger.info("CamToggle prêt — service(s) : %s", ", ".join(self._services()) or "aucun")
+        self._logger.info("CamToggle ready - service(s): %s", ", ".join(self._services()) or "none")
         if self._settings.get_boolean(["persist"]) and self._settings.get(["desired"]) in ("on", "off"):
             threading.Thread(target=self._restore_state, daemon=True).start()
 
     def _restore_state(self):
-        # Le service caméra peut démarrer après OctoPrint : on vérifie deux fois.
+        # The camera service may start after OctoPrint: check twice.
         enable = self._settings.get(["desired"]) == "on"
         for delay in (10, 60):
             time.sleep(delay)
             if self._is_active() != enable:
-                self._logger.info("Réapplication de l'état mémorisé : %s", "on" if enable else "off")
+                self._logger.info("Re-applying remembered state: %s", "on" if enable else "off")
                 self._set_state(enable)
 
     def on_event(self, event, payload):

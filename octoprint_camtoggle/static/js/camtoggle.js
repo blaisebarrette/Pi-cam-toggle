@@ -9,7 +9,7 @@ $(function () {
         self.services = ko.observableArray([]);
         self.loaded = false;
 
-        // Recharge le flux de la webcam d'OctoPrint quand l'état change.
+        // Reload OctoPrint's webcam stream when the state changes.
         self.active.subscribe(function (active) {
             if (self.loaded) self.reloadViewer(active);
         });
@@ -17,7 +17,7 @@ $(function () {
         self.reloadViewer = function (active) {
             $("img[id^='webcam_image'], img.webcam_image, #webcam_container img").each(function () {
                 var img = this;
-                // Onglet webcam masqué (src vide) : OctoPrint rechargera lui-même le flux.
+                // Webcam tab hidden (empty src): OctoPrint will reload the stream itself.
                 if (!/^https?:/.test(img.src || "")) return;
                 var base = img.src.replace(/([?&])_camtoggle=\d+&?/, "$1").replace(/[?&]$/, "");
 
@@ -25,7 +25,7 @@ $(function () {
                 var load = function () {
                     img.src = base + (base.indexOf("?") < 0 ? "?" : "&") + "_camtoggle=" + Date.now();
                 };
-                // Le streamer met un moment à démarrer : on réessaie quelques fois.
+                // The streamer takes a moment to start: retry a few times.
                 img.onerror = active ? function () {
                     if (++tries <= 5) setTimeout(load, 1000);
                 } : null;
@@ -34,8 +34,8 @@ $(function () {
         };
 
         self.title = ko.pureComputed(function () {
-            var svc = self.services().length ? " (" + self.services().join(", ") + ")" : " (aucun service trouvé)";
-            return (self.active() ? "Caméra active — cliquer pour désactiver" : "Caméra désactivée — cliquer pour activer") + svc;
+            var svc = self.services().length ? " (" + self.services().join(", ") + ")" : " (no service found)";
+            return (self.active() ? "Camera on - click to turn off" : "Camera off - click to turn on") + svc;
         });
 
         self.canControl = ko.pureComputed(function () {
@@ -59,7 +59,7 @@ $(function () {
                     self.showErrors(r.errors);
                 })
                 .fail(function (xhr) {
-                    self.showErrors([xhr.responseText || "Erreur inconnue"]);
+                    self.showErrors([xhr.responseText || "Unknown error"]);
                 })
                 .always(function () {
                     self.busy(false);

@@ -10,7 +10,7 @@ A navbar button in OctoPrint to **stop / start the Raspberry Pi camera service**
 - Webcam stream reloaded automatically after a toggle.
 - Option: keep the state across reboots (re-applied when OctoPrint starts).
 - Option: turn the camera on when a print starts / off when it ends.
-- Dedicated permission `CamToggle → Contrôle caméra` (admins by default).
+- Dedicated permission `CamToggle → Camera control` (admins by default).
 
 ## Installation
 *Settings → Plugin Manager → Get More → …from URL*:
@@ -53,7 +53,7 @@ To force a service, set it in *Settings → CamToggle*.
 - ✅ `/dev/video0` released, no more capture.
 - ✅ No more video traffic on the network.
 - ❌ GPU memory (`gpu_mem`) stays reserved and the camera driver stays loaded (set at boot).
-- ⚠️ Timelapses fail while the camera is off: use the "turn on when a print starts" option.
+- ⚠️ Timelapses fail while the camera is off: use the "Turn the camera on when a print starts" option.
 
 To measure (camera on, then off):
 ```bash

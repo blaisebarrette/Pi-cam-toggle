@@ -1,4 +1,4 @@
-# Inutile sur OctoPi (« sudo service » y est déjà autorisé).
-# Ailleurs : copier dans /etc/sudoers.d/octoprint-camtoggle (chmod 440), puis valider : sudo visudo -c
-# Adapter l'utilisateur (pi) et le service (webcamd).
+# Not needed on OctoPi ("sudo service" is already allowed there).
+# Elsewhere: copy to /etc/sudoers.d/octoprint-camtoggle (chmod 440), then check: sudo visudo -c
+# Adjust the user (pi) and the service (webcamd).
 pi ALL=(root) NOPASSWD: /usr/bin/systemctl start webcamd, /usr/bin/systemctl stop webcamd

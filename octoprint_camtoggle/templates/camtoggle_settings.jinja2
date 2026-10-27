@@ -1,19 +1,19 @@
 <h3>CamToggle</h3>
 <form class="form-horizontal" onsubmit="return false;">
     <div class="control-group">
-        <label class="control-label">Service(s) systemd</label>
+        <label class="control-label">systemd service(s)</label>
         <div class="controls">
             <input type="text" class="input-xlarge" placeholder="auto" data-bind="value: settings.plugins.camtoggle.services">
             <span class="help-block">
-                <strong>Laisser vide pour la détection automatique</strong> (le service trouvé s'affiche
-                en survolant l'icône caméra). Sinon, un ou plusieurs services séparés par des virgules. OctoPi ≥ 1.0 : <code>camera-streamer-libcamera</code>
-                (Pi Cam) ou <code>camera-streamer-usb-default</code>. OctoPi &lt; 1.0 : <code>webcamd</code>.
-                Crowsnest : <code>crowsnest</code>.
+                <strong>Leave empty for auto-detection</strong> (hover the camera icon to see the detected
+                service). Otherwise, one or more comma-separated services. OctoPi ≥ 1.0: <code>camera-streamer-libcamera</code>
+                (Pi Cam) or <code>camera-streamer-usb-default</code>. OctoPi &lt; 1.0: <code>webcamd</code>.
+                Crowsnest: <code>crowsnest</code>.
             </span>
         </div>
     </div>
     <div class="control-group">
-        <label class="control-label">Chemin systemctl</label>
+        <label class="control-label">systemctl path</label>
         <div class="controls">
             <input type="text" class="input-large" data-bind="value: settings.plugins.camtoggle.systemctl">
         </div>
@@ -22,18 +22,18 @@
         <div class="controls">
             <label class="checkbox">
                 <input type="checkbox" data-bind="checked: settings.plugins.camtoggle.persist">
-                Conserver l'état après un redémarrage (réappliqué au démarrage d'OctoPrint)
+                Keep state across reboots (re-applied when OctoPrint starts)
             </label>
             <label class="checkbox">
                 <input type="checkbox" data-bind="checked: settings.plugins.camtoggle.auto_on_print_start">
-                Activer la caméra au début d'une impression
+                Turn the camera on when a print starts
             </label>
             <label class="checkbox">
                 <input type="checkbox" data-bind="checked: settings.plugins.camtoggle.auto_off_print_done">
-                Désactiver la caméra à la fin d'une impression
+                Turn the camera off when a print ends
             </label>
         </div>
     </div>
-    <p class="muted">Sur OctoPi, aucune configuration n'est nécessaire (« sudo service » y est déjà autorisé).
-        Ailleurs, une règle sudoers est requise — voir le README du plugin.</p>
+    <p class="muted">On OctoPi, no configuration is needed ("sudo service" is already allowed).
+        Elsewhere, a sudoers rule is required — see the plugin README.</p>
 </form>
