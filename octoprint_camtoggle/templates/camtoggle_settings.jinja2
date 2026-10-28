@@ -34,6 +34,18 @@
             </label>
         </div>
     </div>
-    <p class="muted">On OctoPi, no configuration is needed ("sudo service" is already allowed).
-        Elsewhere, a sudoers rule is required — see the plugin README.</p>
+    <h4>How it works</h4>
+    <p class="muted">
+        The camera icon in the navbar stops or starts the camera's systemd service. When the service is stopped,
+        the camera, CPU, memory and network bandwidth it used are freed. Green icon = running, grey = stopped.
+        The webcam stream reloads after each change, and the state is synced across all open browsers.
+    </p>
+    <p class="muted">
+        Without "Keep state across reboots", the camera follows the system at boot (usually on).
+        Timelapses fail while the camera is off: use "Turn the camera on when a print starts" if you record them.
+    </p>
+    <p class="muted">
+        Documentation, troubleshooting and source code:
+        <a href="https://github.com/blaisebarrette/Pi-cam-toggle" target="_blank" rel="noopener noreferrer">github.com/blaisebarrette/Pi-cam-toggle</a>
+    </p>
 </form>
