@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="OctoPrint-CamToggle",
-    version="0.3.2",
+    version="0.3.3",
     description="Turn the Raspberry Pi camera service on/off from OctoPrint",
     license="MIT",
     packages=["octoprint_camtoggle"],
