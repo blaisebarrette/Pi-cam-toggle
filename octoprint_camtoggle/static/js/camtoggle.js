@@ -76,7 +76,8 @@ $(function () {
             });
         };
 
-        self.onPluginMessage = function (plugin, data) {
+        // State pushed by the server: print start/end, other browsers, settings save.
+        self.onDataUpdaterPluginMessage = function (plugin, data) {
             if (plugin !== "camtoggle") return;
             self.active(data.active);
             if (data.services) self.services(data.services);
